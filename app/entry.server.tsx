@@ -11,11 +11,21 @@ export default async function handleRequest(
   remixContext: EntryContext,
   context: AppLoadContext,
 ) {
+  const projectId = context.env.SANITY_PROJECT_ID;
+  const studioHostname = context.env.SANITY_STUDIO_HOSTNAME || 'http://localhost:3333';
+  const isPreviewEnabled = context.sanity.preview?.enabled;
   const {nonce, header, NonceProvider} = createContentSecurityPolicy({
     shop: {
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    // If your storefront and Studio are on separate domains...
+    // ...allow Sanity assets loaded from the CDN to be loaded in your storefront
+    defaultSrc: ['https://cdn.sanity.io'],
+    // ...allow Studio to load your storefront in Presentation's iframe
+    frameAncestors: isPreviewEnabled ? [studioHostname] : undefined,
+    // ...allow client-side requests for Studio to do realtime collaboration
+    connectSrc: [`https://${projectId}.api.sanity.io`, `wss://${projectId}.api.sanity.io`]
   });
 
   const body = await renderToReadableStream(

@@ -4,3 +4,13 @@
  */
 
 @import 'tailwindcss';
+
+@theme {
+  --font-family-display: "Satoshi", "sans-serif";
+
+  --breakpoint-3xl: 1920px;
+
+  --color-neon-pink: oklch(71.7% 0.25 360);
+  --color-neon-lime: oklch(91.5% 0.258 129);
+  --color-accent: #FAF3EA;
+}

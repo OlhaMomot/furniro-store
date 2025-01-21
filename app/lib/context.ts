@@ -1,19 +1,13 @@
 import {createHydrogenContext} from '@shopify/hydrogen';
 import {AppSession} from '~/lib/session';
 import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
+import {createSanityContext} from 'hydrogen-sanity';
 
-/**
- * The context implementation is separate from server.ts
- * so that type can be extracted for AppLoadContext
- * */
 export async function createAppLoadContext(
   request: Request,
   env: Env,
   executionContext: ExecutionContext,
 ) {
-  /**
-   * Open a cache instance in the worker and a custom session instance.
-   */
   if (!env?.SESSION_SECRET) {
     throw new Error('SESSION_SECRET environment variable is not set');
   }
@@ -36,8 +30,26 @@ export async function createAppLoadContext(
     },
   });
 
+  // 1. Configure the Sanity Loader and preview mode
+  const sanity = createSanityContext({
+    request,
+
+    // To use the Hydrogen cache for queries
+    cache,
+    waitUntil,
+
+    // Sanity client configuration
+    client: {
+      projectId: env.SANITY_PROJECT_ID,
+      dataset: env.SANITY_DATASET || 'production',
+      apiVersion: env.SANITY_API_VERSION || 'v2024-08-08',
+      useCdn: process.env.NODE_ENV === 'production',
+    },
+  });
+
+  // 2. Make Sanity available to loaders and actions in the request context
   return {
     ...hydrogenContext,
-    // declare additional Remix loader context
+    sanity,
   };
-}
+};

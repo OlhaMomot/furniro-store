@@ -18,7 +18,7 @@ export function ProductForm({
   const navigate = useNavigate();
   const {open} = useAside();
   return (
-    <div className="product-form">
+    <div className="product-form h-[48px] w-[202px] flex items-center justify-center bg-white text-[16px] font-semibold text-[#B88E2F] cursor-pointer">
       {productOptions.map((option) => {
         // If there is only a single value in the option values, don't display the option
         if (option.optionValues.length === 1) return null;

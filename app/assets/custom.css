@@ -1,0 +1,74 @@
+.collection-filter-container > ul {
+  display: none;
+}
+
+.collection-filter-container.show > ul {
+  display: flex;
+}
+
+#app {
+  height: 100%;
+}
+
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.swiper-slide {
+  max-height: 500px;
+}
+
+.swiper-slide img {
+  display: block;
+  height: 500px;
+  object-fit: contain;
+}
+
+.swiper {
+  width: 100%;
+  height: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.swiper-slide {
+  background-size: cover;
+  background-position: center;
+}
+
+.mySwiper2 {
+  height: 100%;
+  width: 480px;
+  max-height: 500px;
+  margin-bottom: 50px;
+}
+
+.mySwiper {
+  box-sizing: border-box;
+  padding: 10px 0;
+  gap: 32px;
+}
+
+.mySwiper .swiper-slide {
+  width: 76px !important;
+  height: 76px !important;
+  opacity: 0.4;
+}
+
+.mySwiper .swiper-slide img {
+  width: 76px;
+  height: 76px;
+}
+
+.mySwiper .swiper-slide-thumb-active {
+  opacity: 1;
+}
+
+.mySwiper.swiper-vertical > .swiper-wrapper {
+  gap: 20px;
+}
+
+.mySwiper, .mySwiper2 {
+  max-width: fit-content;
+}

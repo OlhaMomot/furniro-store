@@ -17,6 +17,7 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {VisualEditing} from 'hydrogen-sanity/visual-editing';
 
 export type RootLoader = typeof loader;
 
@@ -80,6 +81,7 @@ export async function loader(args: LoaderFunctionArgs) {
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,
     },
+    isPreviewEnabled: true,
   });
 }
 
@@ -155,6 +157,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         ) : (
           children
         )}
+        {data?.isPreviewEnabled ? <VisualEditing /> : null}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

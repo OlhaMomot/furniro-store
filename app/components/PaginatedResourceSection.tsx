@@ -22,17 +22,19 @@ export function PaginatedResourceSection<NodesType>({
 
         return (
           <div>
-            <PreviousLink>
-              {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-            </PreviousLink>
             {resourcesClassName ? (
               <div className={resourcesClassName}>{resourcesMarkup}</div>
             ) : (
               resourcesMarkup
             )}
-            <NextLink>
-              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-            </NextLink>
+            <div className="mx-[100px] mt-[17px] mb-[40px]">
+              <PreviousLink className="block h-[60px] w-fit rounded-[10px] bg-[#F9F1E7] m-auto py-[15px] px-[28px]">
+                {isLoading ? 'Loading...' : <span>Prev</span>}
+              </PreviousLink>
+              <NextLink className="block h-[60px] w-fit rounded-[10px] bg-[#F9F1E7] m-auto py-[15px] px-[28px]">
+                {isLoading ? 'Loading...' : <span>Next</span>}
+              </NextLink>
+            </div>
           </div>
         );
       }}
