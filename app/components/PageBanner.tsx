@@ -5,7 +5,7 @@ export function PageBanner({content, title}) {
 
   return (
     <div
-      className="banner h-[316px] flex flex-col items-center justify-center"
+      className="banner h-[316px] flex flex-col items-center justify-center bg-cover"
       style={{
         backgroundImage: content.hero?.imageUrl ? `url(${content.hero.imageUrl})` : undefined,
       }}

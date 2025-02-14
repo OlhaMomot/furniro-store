@@ -22,6 +22,7 @@ interface PageLayoutProps {
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
   children?: React.ReactNode;
+  sanityFooter: any;
 }
 
 export function PageLayout({
@@ -31,6 +32,7 @@ export function PageLayout({
   header,
   isLoggedIn,
   publicStoreDomain,
+  sanityFooter,
 }: PageLayoutProps) {
   return (
     <Aside.Provider>
@@ -50,6 +52,7 @@ export function PageLayout({
         footer={footer}
         header={header}
         publicStoreDomain={publicStoreDomain}
+        sanityFooter={sanityFooter}
       />
     </Aside.Provider>
   );

@@ -322,9 +322,6 @@ export async function loader({
 export default function Index() {
   const {initial, productHandles, shopifyProducts} = useLoaderData<typeof loader>();
 
-  console.log("SHOPIFY PRODUCTS:", shopifyProducts);
-  console.log("HANDLES:", productHandles);
-
   const heroSection = initial?.data?.hero;
   const gridItems = initial?.data?.collectionGrid;
 

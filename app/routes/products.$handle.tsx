@@ -260,6 +260,7 @@ export async function loader({
         product(handle: $handle) { 
           id
           title
+          totalInventory
           images(first: 10) {
             edges {
               node {
@@ -268,10 +269,42 @@ export async function loader({
               }
             }
           }
-          variants(first: 1) {
+          options(first: 3) {
+            id
+            name
+            optionValues {
+              name
+              swatch {
+                color
+              }
+            }
+          }
+          descriptionHtml
+          category {
+            name
+          }
+          metafield(namespace: "custom", key: "gallery") {
+            value
+            type
+            references(first: 10) {
+              edges {
+                node {
+                  ... on MediaImage {
+                    image {
+                      id
+                      originalSrc
+                    }
+                  }
+                }
+              }
+            }
+          }
+          tags
+          variants(first: 10) {
             edges {
               node {
                 availableForSale
+                quantityAvailable
                 compareAtPrice {
                   amount
                   currencyCode
@@ -334,40 +367,6 @@ export async function loader({
     }
   }
   ` as const;
-  //   const RECOMMENDED_PRODUCTS_BY_COLLECTION_QUERY = `#graphql
-//   query RecommendedProductsByCollection($id: ID!) {
-//     product(id: $id) {
-//       collections(first: 1) {
-//         edges {
-//           node {
-//             products(first: 4) {
-//               edges {
-//                 node {
-//                   id
-//                   title
-//                   handle
-//                   priceRange {
-//                     minVariantPrice {
-//                       amount
-//                       currencyCode
-//                     }
-//                   }
-//                   images(first: 1) {
-//                     nodes {
-//                       id
-//                       url
-//                       altText
-//                     }
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// ` as const;
 
   const recommendedProducts = await storefront.query(
     RECOMMENDED_PRODUCTS_BY_COLLECTION_QUERY,
@@ -393,14 +392,39 @@ export default function Page() {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
   const variant = product.variants.edges[0].node;
-  const selectedVariant = useOptimisticVariant(
-    variant,
-    getAdjacentAndFirstAvailableVariants(product),
+
+  const [selectedVariant, setSelectedVariant] = useState(
+    useOptimisticVariant(
+      variant,
+      getAdjacentAndFirstAvailableVariants(product),
+    ),
   );
+
   const productOptions = getProductOptions({
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
   });
+
+  const [selectedOptions, setSelectedOptions] = useState(
+    product.options.reduce((acc, option) => {
+      acc[option.name] = option.optionValues[0].name;
+      return acc;
+    }, {}),
+  );
+
+  const handleOptionSelect = (optionName, value) => {
+    const updatedOptions = { ...selectedOptions, [optionName]: value };
+    setSelectedOptions(updatedOptions);
+
+    // Find the variant that matches all selected options
+    const matchingVariant = product.variants.edges.find(({ node }) => 
+      node.selectedOptions.every(
+        (opt) => updatedOptions[opt.name] === opt.value
+      ),
+    )?.node;
+
+    setSelectedVariant(matchingVariant || null);
+  };
 
   console.log("PRODUCT:", product);
 
@@ -426,7 +450,6 @@ export default function Page() {
             navigation={false}
             thumbs={{swiper: thumbsSwiper}}
             modules={[FreeMode, Navigation, Thumbs]}
-            direction="vertical"
             className="mySwiper2"
           >
             {product.images.edges.map((image) => (
@@ -467,10 +490,61 @@ export default function Page() {
 
           {page?.body?.length > 0 ? <PortableText value={page.body} /> : null}
 
-          <ProductForm
-            productOptions={productOptions}
-            selectedVariant={selectedVariant}
-          />
+          {product.options.map((option) => (
+            <div key={option.id}>
+              <span className="text-[14px] text-[#9F9F9F] my-[14px]">
+                {option.name}
+              </span>
+              <div className="flex gap-2 mt-2">
+                {option.optionValues.map((value) =>
+                  value.swatch?.color ? (
+                    <span
+                      key={value.swatch.color}
+                      className={`w-[30px] h-[30px] rounded-full cursor-pointer 
+                        ${selectedOptions[option.name] === value.name ? 'border-2 border-[#B88E2F]' : ''}`}
+                      style={{ backgroundColor: value.swatch.color }}
+                      onClick={() => handleOptionSelect(option.name, value.name)}
+                    ></span>
+                  ) : (
+                    <span
+                      key={value.id}
+                      className={`w-[30px] h-[30px] flex items-center justify-center text-[13px] rounded cursor-pointer 
+                        ${selectedOptions[option.name] === value.name ? 'bg-[#B88E2F] text-white' : 'bg-accent'}`}
+                      onClick={() => handleOptionSelect(option.name, value.name)}
+                    >
+                      {value.name}
+                    </span>
+                  ),
+                )}
+              </div>
+            </div>
+          ))}
+
+          <div className="rounded-[15px] h-[64px] w-[215px] flex items-center justify-center border border-black !text-black !text-[20px] my-8">
+            <ProductForm
+              productOptions={productOptions}
+              selectedVariant={selectedVariant}
+            />
+          </div>
+
+          <div className="mt-[60px] mb-[56px] pt-[50px] text-[#9F9F9F] border-t border-t-[#D9D9D9]">
+            <div className="grid grid-cols-[minmax(0,150px)_1fr]">
+              <span>SKU</span>
+              <span>{selectedVariant.sku}</span>
+            </div>
+
+            <div className="grid grid-cols-[minmax(0,150px)_1fr]">
+              <span>Category</span>
+              <span>{product.category?.name}</span>
+            </div>
+
+            <div className="grid grid-cols-[minmax(0,150px)_1fr]">
+              <span>Tags</span>
+              <span>
+                {product.tags.map((tag) => (<span>{tag}, </span>))}
+              </span>
+            </div>
+          </div>
           <p>
             <Link to="/products">&larr; Back to All Products</Link>
           </p>
@@ -480,6 +554,20 @@ export default function Page() {
               <Link to={page.relatedProduct.url}>{page.relatedProduct.title}</Link>
             </p>
           )}
+        </div>
+      </div>
+
+      <div className="border-t border-t-[#D9D9D9] p-[48px]">
+        <h4 className="text-center text-[24px]">Description</h4>
+        <div className="text-[#9F9F9F] px-[100px] py-[36px]">{product.descriptionHtml}</div>
+        <div className="flex justify-around">
+          {product.metafield?.references?.edges.map((reference) => (
+            <img
+              key={reference.node.image.id}
+              src={reference.node.image.originalSrc}
+              alt={product.title}
+            />
+          ))}
         </div>
       </div>
 

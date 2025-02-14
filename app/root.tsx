@@ -18,6 +18,8 @@ import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import {VisualEditing} from 'hydrogen-sanity/visual-editing';
+import { groq } from 'hydrogen-sanity/groq';
+import { SanityDocument } from 'hydrogen-sanity';
 
 export type RootLoader = typeof loader;
 
@@ -90,7 +92,7 @@ export async function loader(args: LoaderFunctionArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({context}: LoaderFunctionArgs) {
-  const {storefront} = context;
+  const {storefront, sanity} = context;
 
   const [header] = await Promise.all([
     storefront.query(HEADER_QUERY, {
@@ -102,7 +104,17 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {header};
+  const sanityQuery = groq`
+  *[_type == "settings"][0]{
+    footer {
+      text
+    }
+  }
+`;
+
+  const sanityFooter = await sanity.loadQuery<SanityDocument>(sanityQuery);
+
+  return {header, sanityFooter};
 }
 
 /**
@@ -126,6 +138,7 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
       console.error(error);
       return null;
     });
+
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
@@ -151,6 +164,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
             cart={data.cart}
             shop={data.shop}
             consent={data.consent}
+            sanityFooter={data.sanityFooter}
           >
             <PageLayout {...data}>{children}</PageLayout>
           </Analytics.Provider>

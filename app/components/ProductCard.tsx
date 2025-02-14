@@ -17,7 +17,7 @@ export function ProductCard({product}) {
   console.log('SELECTED:', selectedVariant);
   return (
     <div className="flex flex-col relative group">
-      <div className="hidden group-hover:flex absolute top-0 bottom-0 left-0 right-0 z-[1] items-center justify-center">
+      <div className="opacity-0 group-hover:opacity-100 flex absolute top-0 bottom-0 left-0 right-0 z-[1] items-center justify-center transition-all">
         <div className="absolute top-0 bottom-0 left-0 right-0 bg-[#3A3A3A] opacity-60"></div>
         <div className="relative z-10">
           <ProductForm
